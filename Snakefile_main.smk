@@ -32,66 +32,23 @@ def add_wild(path, target='{target}', subtype='{subtype}'):
 def add_static(path, target='{{target}}', subtype='{{subtype}}'):
     return os.path.join(DIR, subtype, target, path)
 
-def parse_distrib(name, distrib):
-    toReturn = "{}: ".format(name)
-    if distrib[0]:
-        toReturn += "{} ({}, {})".format(distrib[-1], *distrib[1:3])
-    else:
-        if len(distrib[1:]) > 1:
-            toReturn += "choice from {}".format(distrib[1:])
+def pretty(d, s='', indent=0):
+    for key, value in d.items():
+        s += f"{' ' * 4 * indent}- {key}: "
+        if isinstance(value, dict):
+            s = pretty(value, s=s+'\n', indent=indent+1)
+        elif isinstance(value, list):
+            s += ', '.join([str(x) for x in value]) + '\n'
         else:
-            toReturn += "{}".format(distrib[1])
-    return toReturn
-
-def parse_params(params_path, models):
-    params_tot = json.load(open(params_path, 'r'))
-    tot = []
-    for model, params in params_tot.items():
-        if model in models:
-            strings = []
-            for name, distrib in params.items():
-                strings.append(parse_distrib(name, distrib))
-            s = "\t\t- {}: \n\t\t\t- {}".format(model, "\n\t\t\t- ".join(strings))
-            tot.append(s)
-    return '\n'.join(tot)
+            s += f"{value} \n"
+    return s
 
 def print_summary(config_in=config):
-    config_copy = {k:v for (k, v) in config_in.items()}
-    keys = ['results_dir']
-
     string = 100 * "=" + "\n"
-    string += "Execution starting at: {}\n".format(
-        datetime.now())
-
-    datasets = ['train_set', 'test_set', 'external_set', 'metadata']
-    keys.extend(datasets)
-
-    string += "\n Input files:\n\n"
-    for data_type in datasets:
-        string += "\t- {}: {}\n".format(
-            data_type, config_copy[data_type])
-
-    string += "\n\n Model(s) trained:\n\n"
-    for model in config_copy['model']:
-        string += "\t- {}\n".format(model)
-
-    string += "\n\n Subtype(s) used:\n\n"
-    for subtype in config_copy['subtype']:
-        string += "\t- {}\n".format(subtype)
-
-    keys.extend(['model', 'subtype'])
-
-    string += "\n\n Final model trained {} times.\n".format(
-        config_copy['num_final_repeats'])
-    keys.extend(['num_final_repeats'])
-
-    for key in keys:
-        config_copy.pop(key)
-
-    if config_copy != {}:
-        string += "\n\n configuration configuration:\n\n"
-        for k, v in config_copy.items():
-            string += "\t- {}: {}\n".format(k, v)
+    string += f"Execution starting at: {datetime.now()}\n"
+    string += "Values specified in configuration:\n\n"
+    string += pretty(config_in)
+    string += "\n" + 100 * "=" 
 
     return string
 
@@ -113,8 +70,7 @@ onstart:
     print('executing start handler')
     os.makedirs(DIR, exist_ok=True)
     os.makedirs(os.path.join(DIR, '.logs'), exist_ok=True)
-    shell('rm -f no_cross_training.txt')
-    shell('conda list > {}'.format(env))
+    shell(f'conda list > {env}')
 
     with open(summary, 'a') as out:
         out.write(print_summary())
@@ -122,14 +78,12 @@ onstart:
 
 onsuccess:
     with open(summary, 'a') as out:
-        out.write("\n\nFinished at: {}\n".format(
-            datetime.now()))
+        out.write(f"\n\nFinished at: {datetime.now()}\n")
         out.write(100 * "=" + "\n")
 
 onerror:
     with open(summary, 'a') as out:
-        out.write('\n\n### FINISHED WITH ERROR at: {} ###\n'.format(
-            datetime.now()))
+        out.write(f'\n\n### FINISHED WITH ERROR at: {datetime.now()} ###\n')
         out.write(100 * "=" + "\n")
 
 #############################
@@ -157,38 +111,6 @@ rule all:
     params:
         mem = 100,
         log_dir = os.path.join(DIR, '.logs')
-
-rule all_cross_training:
-    input:
-        repeated = expand(
-            os.path.join(DIR, CROSS_DIR,
-            '{data}-{model}-from-{from_target}-{from_subtype}-to-{to_target}-num{repeat}.tsv'),
-            data=TEST_SETS,
-            model=[m for m in config['model'] if repeat_training.get(m, False)], 
-            from_target=config['target'], 
-            to_target=config['target'],
-            from_subtype=config['subtype'],
-            repeat=range(FINAL_REPEATS)
-        ),
-        not_repeated = expand(
-            os.path.join(DIR, CROSS_DIR,
-            '{data}-{model}-from-{from_target}-{from_subtype}-to-{to_target}-num{repeat}.tsv'),
-            data=TEST_SETS, 
-            model=[m for m in config['model'] if not repeat_training.get(m, False)],
-            from_target=config['target'],
-            to_target=config['target'],
-            from_subtype=config['subtype'],
-            repeat=range(1)
-        )
-    params:
-        mem = 100,
-        log_dir = os.path.join(DIR, '.logs')
-    output:
-        output = 'cross_training.txt'
-    shell:
-        '''
-        touch {output.output}
-        '''
 
 rule subset_data:
     input:
@@ -283,87 +205,3 @@ rule get_predictions:
         for ext, preds in zip(input.external_sets, output.predictions_externals):
             external_df = learning_utils.get_predictions(model, ext, params.target, BALANCE)
             external_df.to_csv(preds, sep='\t')
-
-rule train_glmnet:
-    input:
-        train_set = add_wild('train-set.tsv', target=''),
-        test_set = add_wild('test-set.tsv', target=''),
-        external_set = expand(add_static('{external}-set.tsv', target=''), external=EXTERNALS.keys()),
-        script = 'scripts/caret_regression.r'
-    params:
-        mem = 3500,
-        log_dir = os.path.join(DIR, '.logs'),
-        metric = METRIC,
-        target = lambda wildcards: wildcards.target,
-        balance = "--balance" if BALANCE else ""
-    threads: 4
-    output:
-        model = add_wild('final-glmnet-num{repeat}.rds'),
-        coefficients =add_wild('final-glmnet-coefficients-num{repeat}.tsv'),
-        performance_test = add_wild(
-            'final-glmnet-test-results-num{repeat}.json'),
-        predictions_test = add_wild(
-            'final-glmnet-test-predictions-num{repeat}.tsv'),
-        performance_external = expand(add_static(
-            'final-glmnet-{external}-results-num{{repeat}}.json'), external=EXTERNALS.keys()),
-        predictions_external = expand(add_static(
-            'final-glmnet-{external}-predictions-num{{repeat}}.tsv'), external=EXTERNALS.keys())
-    shell:
-        '''
-        Rscript --vanilla {input.script}\
-            --train {input.train_set}\
-            --test {input.test_set}\
-            --external {input.external_set}\
-            --output_test {output.performance_test}\
-            --output_external {output.performance_external}\
-            --pred_test {output.predictions_test}\
-            --pred_external {output.predictions_external}\
-            --model {output.model}\
-            --coefficients {output.coefficients}\
-            --metric {params.metric}\
-            --target {params.target}\
-            --classify\
-            {params.balance}
-        '''
-
-rule cross_train:
-    input:
-        model = add_wild('final-{model}-num{repeat}.pkl.bz2', subtype='{from_subtype}', target='{from_target}'),
-        data = add_wild('{data}-set.tsv', subtype='{from_subtype}', target='{to_target}')
-    params:
-        mem = 15000,
-        log_dir = os.path.join(DIR, '.logs'),
-        target = lambda wildcards: wildcards.to_target
-    threads: 4
-    wildcard_constraints:
-        model = "(?!glmnet).*"
-    output:
-        performance = os.path.join(DIR, CROSS_DIR, '{data}-{model}-from-{from_target}-{from_subtype}-to-{to_target}-num{repeat}.tsv')
-    run:
-        with bz2.BZ2File(input.model, 'r') as infile:
-            model = pickle.load(infile)
-        test_df = learning_utils.get_predictions(model, input.data, params.target, config['balance'])
-        test_df.to_csv(output.performance, sep='\t', index=True, header=True)
-
-
-rule cross_train_glmnet:
-    input:
-        model = add_wild('final-glmnet-num{repeat}.rds', subtype='{from_subtype}', target='{from_target}'),
-        data = add_wild('{data}-set.tsv', subtype='{from_subtype}', target='{to_target}'),
-        script = 'scripts/caret_cross_prediction.r'
-    params:
-        mem = 3500,
-        log_dir = os.path.join(DIR, '.logs'),
-        target = lambda wildcards: wildcards.to_target
-    threads: 4
-    output:
-        performance = os.path.join(DIR, CROSS_DIR, '{data}-glmnet-from-{from_target}-{from_subtype}-to-{to_target}-num{repeat}.tsv')
-    shell:
-        '''
-        Rscript --vanilla {input.script}\
-            --model {input.model}\
-            --test {input.data}\
-            --target {params.target}\
-            --output {output.performance}
-        '''
-
