@@ -9,7 +9,7 @@ if config == dict():
         'metadata_dir': 'data_pre_split',
         'encoder': os.path.join('utils_hiv', 'utils_hiv', 'data_encoder.py'),
         'output_dir': os.path.join('data_pre_split', 'new_target'),
-        'countries': ['Africa', 'UK']
+        'regions': ['Africa', 'UK']
     }
 
 DIR = config.get('data_dir', os.path.join('data_pre_split', 'HIVDB_data'))
@@ -21,19 +21,19 @@ print(config)
 rule all:
     input: 
         expand(
-        os.path.join(OUT, "{country}-data.tsv"),
-        country=config['countries']
+        os.path.join(OUT, "{region}-data.tsv"),
+        region=config['regions']
     )
 
 rule process_data:
     input:
-        naive_seqs = os.path.join(DIR,"{country}", "PrettyRTAA_naive.tsv"),
-        treated_seqs = os.path.join(DIR,"{country}", "PrettyRTAA_treated.tsv"),
-        naive_res = os.path.join(DIR,"{country}", "ResistanceSummary_naive.tsv"),
-        treated_res = os.path.join(DIR,"{country}", "ResistanceSummary_treated.tsv"),
-        metadata = os.path.join(METADIR, "{country}-metadata.tsv"),
+        naive_seqs = os.path.join(DIR,"{region}", "PrettyRTAA_naive.tsv"),
+        treated_seqs = os.path.join(DIR,"{region}", "PrettyRTAA_treated.tsv"),
+        naive_res = os.path.join(DIR,"{region}", "ResistanceSummary_naive.tsv"),
+        treated_res = os.path.join(DIR,"{region}", "ResistanceSummary_treated.tsv"),
+        metadata = os.path.join(METADIR, "{region}-metadata.tsv"),
         script = config['encoder']
-    output: temp(os.path.join(DIR, "{country}", "encoded_data.tsv"))
+    output: temp(os.path.join(DIR, "{region}", "encoded_data.tsv"))
     shell: 
         """
         python3 {input.script} \
@@ -47,27 +47,27 @@ rule process_data:
 rule homogenize_data:
     input: 
         expand(
-            os.path.join(DIR, "{country}", "encoded_data.tsv"),
-            country=config['countries']
+            os.path.join(DIR, "{region}", "encoded_data.tsv"),
+            region=config['regions']
         )
     output: 
         expand(
-            os.path.join(OUT, "{country}-data.tsv"),
-            country=config['countries']
+            os.path.join(OUT, "{region}-data.tsv"),
+            region=config['regions']
         )
     run:
-        regex_in = r".*/(?P<country>[^/]+)/encoded_data\.tsv$"
-        regex_out = r"^.*/(?P<country>[^/]+)-data\.tsv$"
+        regex_in = r".*/(?P<region>[^/]+)/encoded_data\.tsv$"
+        regex_out = r"^.*/(?P<region>[^/]+)-data\.tsv$"
         data = {}
         for input_file in input:
-            country = re.match(regex_in, input_file).group('country')
-            data[country] = pd.read_csv(input_file, sep='\t').set_index('inputSequence')
+            region = re.match(regex_in, input_file).group('region')
+            data[region] = pd.read_csv(input_file, sep='\t').set_index('inputSequence')
 
         cols = pd.concat([dataset.iloc[:2] for dataset in data.values()], axis=0).columns
 
         for output_path in output:
-            country = re.match(regex_out, output_path).group('country')
-            (data[country]
+            region = re.match(regex_out, output_path).group('region')
+            (data[region]
                 .reindex(cols)
                 .fillna(0)
                 .to_csv(output_path, header=True, index=True))
