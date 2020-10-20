@@ -68,5 +68,5 @@ In an actual run of this pipeline we might want to also increase the number of r
 
 ## Scripts
 
-The results from the main pipeline can then be processed by the `gather_results.py` script. This script takes as input the list of result directories that were created by the pipeline and outputs a concatenated tab-delimited file with all predictions, as well as a concatenated tab-delimited file containing the importances/weights assigned by all trained models to the dataset features.  
+The results from the main pipeline can then be processed by the `gather_results.py` script. This script takes as input the list of result directories that were created by the pipeline and outputs a concatenated tab-delimited file with all predictions, as well as a concatenated tab-delimited file containing the importances/weights assigned by all trained models to the dataset features.  This script can also be used to concatenate the results of several runs of the main pipeline. 
 These files can then be used for interpretation and figure generation (several examples in the `notebooks` directory).
