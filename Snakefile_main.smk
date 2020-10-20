@@ -4,7 +4,7 @@ import pandas as pd
 import json
 import os.path
 from datetime import datetime
-from utils_hiv import data_utils, param_utils, learning_utils
+from utils_hiv import data_utils, learning_utils
 
 repeat_training = {
     'RF': True,
@@ -115,7 +115,6 @@ rule all:
 rule subset_data:
     input:
         config_train = config['train_set'],
-        config_test = config['test_set'],
         config_external = config['external_set'].values(),
         metadata = config['metadata']
     params:
@@ -131,8 +130,7 @@ rule subset_data:
         train = data_utils.choose_subtype(
             input.config_train, input.metadata, params.subtype)
         test = data_utils.exclude_subtype(
-            input.config_test, input.metadata, params.subtype)
-        # test = pd.read_csv(input.config_test, sep='\t', header=0, index_col=0)
+            input.config_train, input.metadata, params.subtype)
         externals = {k:pd.read_csv(v, sep='\t', header=0, index_col=0) for k,v in EXTERNALS.items()}
         if config['remove_consensus']:
             train = data_utils.remove_consensus(train, config['subtype'])

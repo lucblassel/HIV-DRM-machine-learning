@@ -1,0 +1,85 @@
+train_set: 'path/to/train/set' # UK dataset
+external_set: # additional testing sets 
+  __set_name__: 'path/to/external/set' # Africa dataset
+
+metadata: 'path/to/train/set/metadata' # UK metadata
+
+results_dir: 'path/to/where/you/want/your/results'
+
+# List of subtypes you want to train on separately
+subtype:
+  - 'B' # train on UK B test on UK C
+  - 'C' # train on UK C test on UK B
+  - 'ALL' # train on UK B and C test on external test sets
+
+# List of models to train (RF, Logistic, or Bayes)
+model:
+  # Python scikit-learnmodels
+  - 'RF' # RandomForestClassifier
+  - 'Bayes' # MultinomialNB
+  - 'Logistic' # LogisticRegressionCV
+
+  # Custom Fisher classifer classifiers
+  # Bonf = Bonferroni correction, BH = Benjamini-Hochberg
+  # number at end it the necessary number of significant mutations in 
+  # a sample to be classified as positive.
+  - 'FisherBonf1' 
+  - 'FisherBH1' 
+  - 'FisherBonf2' 
+  - 'FisherBH2' 
+
+# Categorical Target feature on which you want to classify (name of feature in dataset)
+target:
+  - 'encoded_label' # RTI status
+  - 'hasDRM' # presence / absence of known DRMs
+
+# parameters for models to train
+# parameter available in scikit-learn documentation
+parameters:
+  RF: 
+    n_jobs: 4
+    n_estimators: 5000
+  Logistic:
+    n_jobs: 4
+    cv: 10
+    Cs: 100
+    penalty: 'l1'
+    multi_class: 'multinomial'
+    solver: 'saga'
+    scoring: 'balanced_accuracy'
+
+# number of times to train the final models on the whole training data
+num_final_repeats: 20
+
+# Wether to remove features corresponding to reference AAs from the training set
+remove_consensus: true
+
+# Which mutations to remove from the sequences (case doesn't matter)
+# 'SDRM' removes all surveillance DRMS,
+# 'DRM' removes non SDRM DRMs
+# 'ALL' removes all DRMs
+# 'ACCESSORY' removes accessory DRMs
+# 'STANDALONE' removes non accessory DRMs
+# 'NRTI' removes NRTI caused DRMs
+# 'NNRTI' removes NNRTI caused DRMs
+# 'OTHER' removes non NRTI/NNRTI caused DRMs
+# Anything else and no features will be removed
+remove_drms: 'SDRM'
+
+# Which sequences to remove from the dataset (case doesn't matter)
+# 'DRM' will remove sequences that has at least 1 known DRM
+# 'NO DRM' will remove sequences that have no known DRM
+# Anything else will not remove any sequences
+remove_sequences: 'None'
+
+# Wether to remove naive sequences with at least 1 DRM from the training set and put them in the testing set
+remove_naive_DRMS: false
+
+# Wether to remove gaps, STOP codons and X AAs.
+deep_clean: true
+
+# Wether to use subsampling to balance labels in the dataset
+balance: false
+
+# what metric to use to evaluate the classifiers
+metric: 'balanced'
