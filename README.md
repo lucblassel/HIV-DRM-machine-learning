@@ -1,4 +1,8 @@
-# HIV DRM detection with machine learning
+# Using machine learning and big data to explore the drug resistance landscape in HIV
+
+This is the main repository for [this article](http://doi.org/bioxrivDOI).  
+It contains the pipelines used to process and generate data and results, the notebooks used to process the results and generate figures, as well as the publicly available data used in this study.  
+The processed results used to generate figures are also available in this repository. 
 
 ## Prerequisites
 
@@ -19,7 +23,18 @@ $ pip install -e utils_hiv
 
 For this pipeline to run you will need several alignments of HIV-1 pol RT sequences from at least 2 datasets: a training set and at least one testing set.  
 Each training/testing set is composed of a FASTA alignment of treatment-naive sequences and another of treatment-experienced sequences.  
-To get the positions of each residue w.r.t. the reference HXB2 sequence and get a suitable format for encoding, you should upload each of your alignments `trainNaive.fa`, `trainTreated.fa`, `testNaive.fa` and `testTreated.fa` into [Stanford's HIVdb program](https://hivdb.stanford.edu/hivdb/by-sequences/). For each uploaded alignment you will get the `PrettyRTAA.tsv` and `ResistanceSummary.tsv` files which are need for dataset encoding.
+To get the positions of each residue w.r.t. the reference HXB2 sequence and get a suitable format for encoding, you should upload each of your alignments `trainNaive.fa`, `trainTreated.fa`, `testNaive.fa` and `testTreated.fa` into [Stanford's HIVdb program](https://hivdb.stanford.edu/hivdb/by-sequences/). For each uploaded alignment you will get the `PrettyRTAA.tsv` and `ResistanceSummary.tsv` files which are need for dataset encoding.  
+In our study the training data corresponds to the UK dataset, and the testing data corresponds to the African dataset  
+
+### Available sequence data
+The African data produced by Peeters *et al.* is available in the `data/African_dataset` directory. This dataset is composed of 2 FASTA files, `naive.fa` that contains all sequences of RTI-naive individuals, and `treated.fa` which contains sequences from RTI-experienced individuals.  
+Additionaly a metadata file we produced with information derived from sequence ids, treatment status and extra output from the Stanford HIVDB algorithms, was made readily available in the form of a .TSV file. 
+
+### Produced results
+We also provide the result files generated during our study and used to create the manuscript figures. These files are presented as .TSV files in the `data/results` directory.  
+The `data/results/Base_results` directory contains results produced by discriminatinng RTI-naive from RTI-experienced sequences, for the dataset with all features, with known RAM features removed and with known RAM features and sequences removed. 
+The `data/results/Alternate_target_results` directory contains result produced by discriminating RTI-naive from RTI-experienced sequences, as well as discriminating sequences with at least one known RAM from sequences that have none, for the dataset with known RAM features removed.  
+In both of these directories the `all_preds.tsv` file contains all the predictions done on all available test sets, by all trained models with the true label. The `coefs_df.tsv` contains the importance values for alltrained classifiers. 
 
 ## pipelines
 
