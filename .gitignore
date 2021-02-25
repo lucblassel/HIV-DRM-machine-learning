@@ -18,6 +18,7 @@
 !Text/
 !data_pre_split/*.tsv
 !data_pre_split/**/*.tsv
+!data/**/*
 
 .snakemake/
 .vscode/
