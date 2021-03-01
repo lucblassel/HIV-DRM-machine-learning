@@ -37,6 +37,7 @@ logs*/
 
 # pipeline output files
 results*/
+whole_dataset*/
 *.test
 *.ext
 *temp*
