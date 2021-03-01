@@ -14,9 +14,9 @@ Sequences data from the UK dataset used to train the classifiers could not be in
 ### Metadata
 The metadata files for both the UK and the African datasets are made available in this repository. 
 Each file is a tab separated value file that contains the following fields:
-  - `id`: the identifier of sequence
+  - `id`: the identifier of the sequence
   - `treatmentstatus`: whether the sequence comes from a naive or treated individual (`"naive" | "treated"`)
-  - `hasDRM`: wether the sequence contains any known DRMs/RAMs or not (`"0" | "1"`)
+  - `hasDRM`: whether the sequence contains any known DRMs/RAMs or not (`"0" | "1"`)
   - `subtype`: the subtype or CRF of the sequence.
 
 ## Result data
@@ -45,7 +45,7 @@ On each of these schemas the following classifiers were trained/ tested
 More details on these classifiers can be obtained [here](https://github.com/lucblassel/utils_hiv/blob/master/utils_hiv/utils/learning_utils.py#L48)
 
 The `all_preds.tsv` file contains predictions for the testing sets of the 9 schemas, made by all the trained models.  
-The `coefs_df.tsv` files contains the feature importance values extracted from all the trained models.  
+The `coefs_df.tsv` file contains the feature importance values extracted from all the trained models.  
 The `preds_total.tsv` file contains the predicted class probabilities for all the testing sets (for models that have probabilistic prediction capabilities)
 
 These predictions were used to create Figure 1 of the manuscript
@@ -61,5 +61,5 @@ The trainings were done on the same 3 training / testing sets as above but with 
 The same classifiers as above were trained and used to generate the results. 
 The resulting files are the same as above. 
 
-These predicitons were used to create Figure 2 of the manuscript
+These predictions were used to create Figure 2 of the manuscript
 
