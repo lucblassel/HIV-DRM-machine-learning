@@ -5,7 +5,7 @@ It contains the pipelines used to process and generate data and results, the not
 The processed results used to generate figures are also available in this repository. 
 
 ## Available data
-Some of the data used in the manuscript is included in this repository. More information [here](data/README.md)
+The data used in the manuscript is included in this repository. More information [here](data/README.md)
 
 ## Prerequisites
 

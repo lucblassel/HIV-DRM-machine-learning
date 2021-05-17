@@ -4,13 +4,14 @@
 Some data used in the pipelines is included in this repository. 
 
 ### Sequence data
-The HIV-1 *pol* RT sequences from the African dataset produced by [Villabona-Arenas et al. (2016)](https://doi.org/10.1097/QAD.0000000000001233) is available in this repository, in the `African_dataset` directory.  
+The HIV-1 *pol* RT **DNA** sequence alignments from the African dataset produced by [Villabona-Arenas et al. (2016)](https://doi.org/10.1097/QAD.0000000000001233) are available in this repository, in the `African_dataset` directory.  
 2 FASTA sequence files are made available: 
  - `naive.fa` contains sequences extracted from RTI-naive individuals
  - `treated.fa` contains sequences extracted from RTI-experienced individuals
 
-Sequences data from the UK dataset used to train the classifiers could not be included in this repository, however the UK HIV Drug Resistance Database can make information available to any bona fide researcher who submits a scientifically robust proposal, provided data exchange complies with Information Governance and Data Security Policies in all the relevant countries. Inquiries should be addressed to [iph.hivrdb@ucl.ac.uk](mailto:iph.hivrdb@ucl.ac.uk).
+The HIV-1 *pol* RT **Protein** sequence alignments from the UK dataset were made available by the [UK HIV Drug Resistance Database](https://www.hivrdb.org.uk/). They are stored in the `UK_dataset`directory with the same 2 FASTA files as the African dataset.
 
+DNA sequence data from the UK dataset used to train the classifiers could not be included in this repository, however the UK HIV Drug Resistance Database can make information available to any bona fide researcher who submits a scientifically robust proposal, provided data exchange complies with Information Governance and Data Security Policies in all the relevant countries. Inquiries should be addressed to [iph.hivrdb@ucl.ac.uk](mailto:iph.hivrdb@ucl.ac.uk).
 ### Metadata
 The metadata files for both the UK and the African datasets are made available in this repository. 
 Each file is a tab separated value file that contains the following fields:
