@@ -1,4 +1,4 @@
-# Inclued data
+# Included data
 
 ## Training data
 Some data used in the pipelines is included in this repository. 
