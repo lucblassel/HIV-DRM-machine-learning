@@ -20,6 +20,11 @@ Each file is a tab separated value file that contains the following fields:
   - `hasDRM`: whether the sequence contains any known DRMs/RAMs or not (`"0" | "1"`)
   - `subtype`: the subtype or CRF of the sequence.
 
+### Encoded Data
+We have included the output of the data preprocessing pipeline, that is to say the sequence data one hot encoded with the various target features. 
+Each column is a binary vector representing the presence/absence of a single mutation in the sequence data. For example a 1 in the "184_V" column means that the sequence has amino acid V at position 184.  
+Both the African and UK datasets are available in this format. These files can be used directly as inputs in the main pipeline, skipping the preprocessing pipeline.
+
 ## Result data
 Some outputs of the pipelines, useful to run the figure generation notebooks are also made available in this repository. 
 
