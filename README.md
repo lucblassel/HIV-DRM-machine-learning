@@ -1,6 +1,6 @@
 # Using machine learning and big data to explore the drug resistance landscape in HIV
 
-This is the main repository for [this article](https://doi.org/10.1101/2021.03.16.435621).  
+This is the main repository for [this article](https://doi.org/10.1371/journal.pcbi.1008873).  
 It contains the pipelines used to process and generate data and results, the notebooks used to process the results and generate figures, as well as the publicly available data used in this study.  
 The processed results used to generate figures are also available in this repository. 
 
